@@ -1,0 +1,245 @@
+[
+ {
+  "id": "flux_port_100um_2um_tapper_2x5x1x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_100um_2um_tapper_2x5x1x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_2um_tapper_2x5x1x0.18.png",
+  "tets": 968454,
+  "nodes": 313658,
+  "surface_tris": 605580,
+  "bbox": [
+   -350.0,
+   -210.0,
+   350.0,
+   590.0
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   3.008,
+   -0.145
+  ],
+  "noise_faces": 1.1275,
+  "noise_sidewalls": 1.2353,
+  "L_pH": 7.6254,
+  "I_A": 2.08717
+ },
+ {
+  "id": "flux_port_100um_2um_tapper_2x5x3x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_100um_2um_tapper_2x5x3x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_2um_tapper_2x5x3x0.18.png",
+  "tets": 1041432,
+  "nodes": 334999,
+  "surface_tris": 643470,
+  "bbox": [
+   -350.0,
+   -210.0,
+   350.0,
+   590.0
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   4.33,
+   0.245
+  ],
+  "noise_faces": 1.0674,
+  "noise_sidewalls": 1.1741,
+  "L_pH": 7.679,
+  "I_A": 2.07259
+ },
+ {
+  "id": "flux_port_100um_2um_tapper_2x5x9x0.18",
+  "source": "ix.msh (no J file)",
+  "parts": [
+   "data/flux_port_100um_2um_tapper_2x5x9x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_2um_tapper_2x5x9x0.18.png",
+  "tets": 1770161,
+  "nodes": 504583,
+  "surface_tris": 844448,
+  "bbox": [
+   -350.0,
+   -210.0,
+   350.0,
+   590.0
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   6.985,
+   -0.106
+  ],
+  "noise_faces": null,
+  "noise_sidewalls": null,
+  "L_pH": null,
+  "I_A": null
+ },
+ {
+  "id": "flux_port_100um_40um_100x39.25x0.75x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_100um_40um_100x39.25x0.75x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_40um_100x39.25x0.75x0.18.png",
+  "tets": 1159197,
+  "nodes": 340393,
+  "surface_tris": 582814,
+  "bbox": [
+   -350.0,
+   -209.35,
+   350.0,
+   590.65
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   20.014,
+   -0.077
+  ],
+  "noise_faces": 4.0267,
+  "noise_sidewalls": 4.2776,
+  "L_pH": 209.5316,
+  "I_A": 0.07596
+ },
+ {
+  "id": "flux_port_100um_taper_40um_101x39.25x0.75x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_100um_taper_40um_101x39.25x0.75x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_taper_40um_101x39.25x0.75x0.18.png",
+  "tets": 943398,
+  "nodes": 306170,
+  "surface_tris": 595148,
+  "bbox": [
+   -350.0,
+   -209.836,
+   350.0,
+   590.164
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   20.035,
+   -0.141
+  ],
+  "noise_faces": 2.0548,
+  "noise_sidewalls": 2.1408,
+  "L_pH": 108.5735,
+  "I_A": 0.14659
+ },
+ {
+  "id": "flux_port_100um_tappered_2um_2x1x1x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_100um_tappered_2um_2x1x1x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_tappered_2um_2x1x1x0.18.png",
+  "tets": 761511,
+  "nodes": 244365,
+  "surface_tris": 466866,
+  "bbox": [
+   -350.0,
+   -210.0,
+   350.0,
+   590.0
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   0.971,
+   -0.136
+  ],
+  "noise_faces": 0.9995,
+  "noise_sidewalls": 1.1114,
+  "L_pH": 4.2519,
+  "I_A": 3.74311
+ },
+ {
+  "id": "flux_port_100um_tappered_2um_2x2x1x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_100um_tappered_2um_2x2x1x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_100um_tappered_2um_2x2x1x0.18.png",
+  "tets": 770014,
+  "nodes": 247294,
+  "surface_tris": 472678,
+  "bbox": [
+   -350.0,
+   -210.0,
+   350.0,
+   590.0
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   1.492,
+   -0.145
+  ],
+  "noise_faces": 1.0487,
+  "noise_sidewalls": 1.1581,
+  "L_pH": 5.286,
+  "I_A": 3.01085
+ },
+ {
+  "id": "flux_port_5um_no_taper_5x39.25x0.75x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_5um_no_taper_5x39.25x0.75x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_5um_no_taper_5x39.25x0.75x0.18.png",
+  "tets": 395540,
+  "nodes": 119600,
+  "surface_tris": 214038,
+  "bbox": [
+   -200.0,
+   -210.5,
+   200.0,
+   289.5
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   19.956,
+   0.087
+  ],
+  "noise_faces": 1.6554,
+  "noise_sidewalls": 1.7667,
+  "L_pH": 32.6157,
+  "I_A": 0.48797
+ },
+ {
+  "id": "flux_port_5um_tappered_2um_2x2x1x0.18",
+  "source": "output/J_ix.vtk",
+  "parts": [
+   "data/flux_port_5um_tappered_2um_2x2x1x0.18.part1.txt"
+  ],
+  "thumb": "data/flux_port_5um_tappered_2um_2x2x1x0.18.png",
+  "tets": 339800,
+  "nodes": 102862,
+  "surface_tris": 184116,
+  "bbox": [
+   -200.0,
+   -210.0,
+   200.0,
+   290.0
+  ],
+  "film_nm": 100.0,
+  "min_edge_nm": 1.0,
+  "junction": [
+   1.536,
+   -0.111
+  ],
+  "noise_faces": 1.0224,
+  "noise_sidewalls": 1.129,
+  "L_pH": 5.1694,
+  "I_A": 3.0788
+ }
+]

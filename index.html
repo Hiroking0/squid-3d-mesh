@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>SQUID 3D Mesh Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: a device list (cards with a top-view thumbnail) and a full-height WebGL viewer, switched by #device-id.
+     One deliberate dark look, like a microscope/CAD viewport, in every theme. */
+  :root {
+    color-scheme: dark;
+    --bg: #0f1216;
+    --panel: #171b21;
+    --panel-2: #1e232b;
+    --line: #2c333d;
+    --ink: #e6e9ee;
+    --ink-2: #a9b1bc;
+    --ink-3: #7c8794;
+    --accent: #5fb3ff;
+    --warn: #e8a84a;
+    --sans: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--sans); }
+  button, select { font: 500 13px var(--sans); color: var(--ink); background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px; cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  button:disabled { opacity: .4; cursor: default; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- list ---- */
+  #list { max-width: 1180px; margin: 0 auto; padding: 28px 16px 40px; }
+  #list h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; text-wrap: balance; }
+  #list .lede { color: var(--ink-2); max-width: 70ch; margin: 0 0 22px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .card { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: start; text-align: left;
+    padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+    color: inherit; text-decoration: none; transition: border-color .15s; }
+  .card:hover { border-color: var(--accent); }
+  .card img { width: 112px; height: 112px; border-radius: 3px; background: var(--panel-2); display: block; }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .card .id { font: 11px var(--mono); color: var(--ink-3); word-break: break-all; margin-bottom: 8px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; font-size: 12.5px; }
+  .kv dt { color: var(--ink-3); }
+  .kv dd { margin: 0; font: 12px var(--mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; font: 11px var(--mono); padding: 1px 6px; border-radius: 3px; margin-top: 8px;
+    border: 1px solid var(--warn); color: var(--warn); }
+  .foot { margin-top: 24px; color: var(--ink-3); font-size: 12.5px; max-width: 90ch; }
+
+  /* ---- viewer ---- */
+  #viewer { height: 100%; display: flex; flex-direction: column; }
+  #viewer header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 16px;
+    background: var(--panel); border-bottom: 1px solid var(--line); }
+  #vTitle { font-size: 15px; font-weight: 600; margin: 0; }
+  .stats { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: 12px var(--mono); color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 4px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-left: auto; }
+  .group { display: flex; align-items: center; gap: 6px; }
+  .group > span { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
+  input[type=range] { width: 110px; accent-color: var(--accent); }
+  #stretchVal { font: 12px var(--mono); color: var(--ink-2); min-width: 44px; }
+  main { position: relative; flex: 1; min-height: 0; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .overlay { position: absolute; background: rgba(23, 27, 33, .92); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 12px; font-size: 12.5px; color: var(--ink-2); }
+  #legend { left: 16px; bottom: 16px; width: 240px; }
+  #legend b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 6px; }
+  #bar { height: 10px; border-radius: 2px; margin: 4px 0 3px; }
+  #ticks { display: flex; justify-content: space-between; font: 11px var(--mono); color: var(--ink-3); }
+  #note { right: 16px; bottom: 16px; max-width: 340px; }
+  #note p { margin: 0 0 6px; }
+  #note p:last-child { margin: 0; color: var(--ink-3); }
+  #status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-2);
+    font: 13px var(--mono); pointer-events: none; text-align: center; padding: 16px; }
+  @media (max-width: 760px) { .controls { margin-left: 0; } #note { display: none; } #legend { width: 200px; } }
+  @media (max-width: 420px) { .card { grid-template-columns: 84px minmax(0, 1fr); } .card img { width: 84px; height: 84px; } }
+</style>
+</head>
+<body>
+
+
+<section id="list">
+  <h1>3D (tetrahedral) TTH meshes of the SQUID layouts</h1>
+  <p class="lede">Every 3D InductEx/TTH run in <code>data/tetra_sims/</code>. Pick a device to open its mesh: the outer
+    faces of every tetrahedron, i.e. the top, bottom and sidewalls of the 100 nm film, coloured by element size or
+    current density. Thumbnails are top views of &plusmn;15&nbsp;&micro;m around the SQUID.</p>
+  <div class="grid" id="cards"></div>
+  <p class="foot">Noise: flux noise at 1&nbsp;Hz in &micro;&Phi;<sub>0</sub>/&radic;Hz from script #26 (2_results/all_3d_runs.csv),
+    n = 5&times;10<sup>17</sup>&nbsp;m<sup>&minus;2</sup>, faces only &rarr; with sidewall spins. L = InductEx loop inductance.
+    Name = hole width &times; hole height &times; lead width &times; bridge width (&micro;m). Mesh export: 3_code/34_mesh_viewer_export.py.</p>
+</section>
+
+<section id="viewer" hidden>
+  <header>
+    <button id="back" type="button">&larr; All devices</button>
+    <h1 id="vTitle"></h1>
+    <div class="stats" id="vStats"></div>
+    <div class="controls">
+      <div class="group"><span>View</span>
+        <button id="vChip" type="button">Whole chip</button>
+        <button id="vSquid" type="button">SQUID</button>
+        <button id="vJunc" type="button">Junction</button>
+      </div>
+      <div class="group"><span>Colour</span>
+        <select id="colour" aria-label="Colour by">
+          <option value="size">element size</option>
+          <option value="J">current density |J|</option>
+          <option value="plain">plain metal</option>
+        </select>
+      </div>
+      <div class="group"><span>Height</span>
+        <input id="stretch" type="range" min="0" max="2.7" step="0.01" value="0" aria-label="Height stretch">
+        <output id="stretchVal" for="stretch"></output>
+      </div>
+      <button id="wire" type="button" aria-pressed="true">Mesh lines</button>
+    </div>
+  </header>
+  <main>
+    <canvas id="c"></canvas>
+    <div id="status"></div>
+    <div id="legend" class="overlay"><b id="legTitle"></b><div id="bar"></div><div id="ticks"></div></div>
+    <div id="note" class="overlay">
+      <p>Outer faces of every tetrahedron in this run: the metal film including its sidewalls. Elements that span
+        the whole 100 nm show as one layer; the 0.18&nbsp;&micro;m junction bridges are finer.</p>
+      <p>Drag to rotate, right-drag to pan, scroll to zoom. Height is stretched; x and y are true scale.</p>
+    </div>
+  </main>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(async function () {
+  const $ = id => document.getElementById(id);
+  let devices = [];
+  try { devices = await (await fetch("devices.json")).json(); }
+  catch (e) { $("cards").textContent = "The device list could not be loaded. Reload the page to try again."; return; }
+  const byId = Object.fromEntries(devices.map(d => [d.id, d]));
+  const UNRELIABLE = ["5x39.25", "101x39.25"];
+
+  function describe(d) {
+    const m = d.id.match(/flux_port_(\d+um)_(.*?)_?([\d.]+)x([\d.]+)x([\d.]+)x([\d.]+)$/);
+    const [, chip, taper, hw, hh, lw, bw] = m || [];
+    const tap = /no_taper/.test(taper) ? "no taper" : /taper_40um/.test(taper) ? "tapered, 40 µm" :
+                /2um/.test(taper) ? "tapered, 2 µm" : taper || "";
+    return { short: m ? `${(+hw).toString()} × ${(+hh).toString()} µm hole` : d.id,
+             sub: m ? `${chip} line, ${tap}; leads ${lw} µm, bridges ${bw} µm` : "" };
+  }
+  const fmt = (v, n = 3) => v == null ? "–" : v.toFixed(n);
+
+  // ---------------- list ----------------
+  $("cards").innerHTML = devices.map(d => {
+    const t = describe(d);
+    const bad = UNRELIABLE.some(u => d.id.includes(u));
+    const tag = d.noise_faces == null ? `<span class="tag">no J file: mesh only</span>`
+              : bad ? `<span class="tag">fails #26 checks</span>` : "";
+    return `<a class="card" href="#${d.id}">
+      <img src="${d.thumb}" alt="Top view of ${t.short}" loading="lazy" width="112" height="112">
+      <div><h2>${t.short}</h2><div class="id">${d.id}</div>
+        <dl class="kv">
+          <dt>layout</dt><dd>${t.sub}</dd>
+          <dt>mesh</dt><dd>${(d.tets / 1e6).toFixed(2)} M tetrahedra</dd>
+          <dt>noise</dt><dd>${fmt(d.noise_faces)} → ${fmt(d.noise_sidewalls)}</dd>
+          <dt>L</dt><dd>${d.L_pH == null ? "–" : d.L_pH.toFixed(2) + " pH"}</dd>
+        </dl>${tag}</div></a>`;
+  }).join("");
+
+  // ---------------- viewer ----------------
+  const canvas = $("c"), status = $("status");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicDepthBuffer: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0f1216);
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.0005, 20000);
+  camera.up.set(0, 0, 1);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.screenSpacePanning = true;
+  scene.add(new THREE.HemisphereLight(0xdfe7f2, 0x20242b, 0.9));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.75);
+  sun.position.set(-0.5, -0.8, 1.2);
+  scene.add(sun);
+  const film = new THREE.Group();
+  scene.add(film);
+
+  const RAMP = [[0.23, 0.30, 0.75], [0.25, 0.60, 0.87], [0.35, 0.80, 0.65], [0.86, 0.85, 0.35], [0.95, 0.45, 0.25]];
+  const rampCss = "linear-gradient(90deg," + RAMP.map((c, i) => `rgb(${c.map(v => Math.round(v * 255))}) ${i * 25}%`).join(",") + ")";
+  function ramp(t) {
+    t = Math.min(1, Math.max(0, t)) * (RAMP.length - 1);
+    const i = Math.min(RAMP.length - 2, Math.floor(t)), f = t - i;
+    return RAMP[i].map((v, k) => v + f * (RAMP[i + 1][k] - v));
+  }
+  // stored as bytes: size = log10(nm) * 255/3.5; |J| = 1 + (log10(A/m^2) - 10) * 254/4 (0 = no data)
+  const MODES = {
+    size: { title: "Element size (shortest edge at a node)", t: (s, j) => (s / 255 * 3.5 - 1) / 2.3,
+            ticks: ["10 nm", "100 nm", "1 µm"] },
+    J: { title: "Current density |J| (A/m², log)", t: (s, j) => (j - 1) / 254, ticks: ["1e10", "1e11", "1e12", "1e13", "1e14"] },
+    plain: { title: "Metal film", plain: true }
+  };
+
+  let cur = null, mesh = null, colourMode = "size", loadToken = 0;
+  async function decode(parts) {
+    const text = (await Promise.all(parts.map(async u => {
+      const r = await fetch(u);
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    }))).join("").trim();
+    const bin = atob(text), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Response(stream).arrayBuffer();
+  }
+  function applyColour() {
+    if (!mesh) return;
+    const m = MODES[colourMode], { qS, qJ, colors, nV } = mesh;
+    for (let i = 0; i < nV; i++) {
+      const c = m.plain ? [0.73, 0.77, 0.81] : ramp(m.t(qS[i], qJ[i]));
+      colors[3 * i] = c[0]; colors[3 * i + 1] = c[1]; colors[3 * i + 2] = c[2];
+    }
+    mesh.geom.attributes.color.needsUpdate = true;
+    $("legTitle").textContent = m.title;
+    $("bar").hidden = $("ticks").hidden = !!m.plain;
+    if (!m.plain) { $("bar").style.background = rampCss; $("ticks").innerHTML = m.ticks.map(t => `<span>${t}</span>`).join(""); }
+  }
+  function setStretch(s) {
+    film.scale.z = s;
+    $("stretch").value = Math.log10(s);
+    $("stretchVal").textContent = (s >= 10 ? Math.round(s) : s.toFixed(1)) + "×";
+  }
+  function view(name) {
+    if (!cur) return;
+    const b = cur.bbox, j = cur.junction;
+    const V = {
+      chip: { target: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2, 0], dist: 1.7 * Math.max(b[2] - b[0], b[3] - b[1]), stretch: 1 },
+      squid: { target: [0, 0, 0], dist: Math.max(16, 4.5 * Math.abs(j[0])), stretch: 1 },
+      junc: { target: [j[0], j[1], 0], dist: 2.6, stretch: 1 }
+    }[name];
+    setStretch(V.stretch);
+    controls.target.set(...V.target);
+    camera.position.set(V.target[0] - 0.55 * V.dist, V.target[1] - 0.75 * V.dist, V.target[2] + 0.55 * V.dist);
+    controls.update();
+  }
+  function clearMesh() {
+    film.children.slice().forEach(o => { film.remove(o); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); });
+    mesh = null;
+  }
+
+  async function open(d) {
+    const token = ++loadToken;
+    cur = d;
+    clearMesh();
+    const t = describe(d);
+    $("vTitle").textContent = t.short;
+    $("vStats").innerHTML = [`${d.tets.toLocaleString("en-US")} tetrahedra`, `${d.nodes.toLocaleString("en-US")} nodes`,
+      `${d.surface_tris.toLocaleString("en-US")} surface triangles`, `film ${d.film_nm} nm`,
+      d.noise_faces == null ? "no J file" : `noise ${fmt(d.noise_faces)} → ${fmt(d.noise_sidewalls)} µΦ₀/√Hz`]
+      .map(s => `<span class="chip">${s}</span>`).join("");
+    const optJ = $("colour").querySelector('option[value="J"]');
+    optJ.disabled = d.noise_faces == null && d.source.startsWith("ix.msh");
+    if (optJ.disabled && colourMode === "J") { colourMode = "size"; $("colour").value = "size"; }
+    status.hidden = false;
+    status.textContent = `Loading the mesh of ${d.id}…`;
+    let buf;
+    try { buf = await decode(d.parts); }
+    catch (e) { if (token === loadToken) status.textContent = "This mesh could not be loaded. Reload the page to try again."; return; }
+    if (token !== loadToken) return;
+    const head = new Uint32Array(buf, 0, 3), nV = head[0], nF = head[1];
+    let off = 12;
+    const xyz = new Float32Array(buf, off, nV * 3); off += nV * 12;
+    const tri = new Uint32Array(buf, off, nF * 3); off += nF * 12;
+    const qJ = new Uint8Array(buf, off, nV); off += nV;
+    const qS = new Uint8Array(buf, off, nV);
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute("position", new THREE.BufferAttribute(xyz, 3));
+    geom.setIndex(new THREE.BufferAttribute(tri, 1));
+    const colors = new Float32Array(nV * 3);
+    geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geom.computeVertexNormals();
+    const solid = new THREE.Mesh(geom, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide,
+      polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }));
+    const wire = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: 0x0b0e12, wireframe: true, transparent: true, opacity: 0.55 }));
+    wire.visible = $("wire").getAttribute("aria-pressed") === "true";
+    const b = d.bbox;
+    const sub = new THREE.Mesh(new THREE.PlaneGeometry(b[2] - b[0], b[3] - b[1]),
+      new THREE.MeshLambertMaterial({ color: 0x252a31, polygonOffset: true, polygonOffsetFactor: 4, polygonOffsetUnits: 4 }));
+    sub.position.set((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, -0.0005);
+    film.add(solid, wire);
+    scene.children.filter(o => o.userData.sub).forEach(o => { scene.remove(o); o.geometry.dispose(); });
+    sub.userData.sub = true;
+    scene.add(sub);
+    mesh = { geom, colors, qS, qJ, nV, wire };
+    applyColour();
+    view("junc");
+    status.hidden = true;
+  }
+
+  function route() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const d = byId[id];
+    $("list").hidden = !!d;
+    $("viewer").hidden = !d;
+    document.body.style.overflow = d ? "hidden" : "";
+    if (d) { resize(); if (cur !== d || !mesh) open(d); }
+    else { loadToken++; }
+  }
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  window.addEventListener("hashchange", route);
+  $("back").onclick = () => { location.hash = ""; route(); };
+  $("vChip").onclick = () => view("chip");
+  $("vSquid").onclick = () => view("squid");
+  $("vJunc").onclick = () => view("junc");
+  $("stretch").addEventListener("input", () => setStretch(Math.pow(10, +$("stretch").value)));
+  $("colour").onchange = e => { colourMode = e.target.value; applyColour(); };
+  $("wire").onclick = () => {
+    const on = $("wire").getAttribute("aria-pressed") !== "true";
+    $("wire").setAttribute("aria-pressed", String(on));
+    if (mesh) mesh.wire.visible = on;
+  };
+  route();
+  (function loop() {
+    if (!$("viewer").hidden) { controls.update(); renderer.render(scene, camera); }
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+
+</body>
+</html>
