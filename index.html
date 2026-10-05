@@ -150,8 +150,9 @@
 (async function () {
   const $ = id => document.getElementById(id);
   let devices = [];
-  try { devices = await (await fetch("devices.json")).json(); }
+  try { devices = await (await fetch("devices.json", { cache: "no-cache" })).json(); }   // always the current list
   catch (e) { $("cards").textContent = "The device list could not be loaded. Reload the page to try again."; return; }
+  devices.forEach(d => { if (!d.name) d.name = d.id; if (d.plot_no === undefined) d.plot_no = null; });
   const byId = Object.fromEntries(devices.map(d => [d.id, d]));
   const UNRELIABLE = ["5x39.25", "101x39.25"];
 
