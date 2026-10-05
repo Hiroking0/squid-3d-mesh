@@ -42,7 +42,7 @@
     color: inherit; text-decoration: none; transition: border-color .15s; }
   .card:hover { border-color: var(--accent); }
   .card img { width: 112px; height: 112px; border-radius: 3px; background: var(--panel-2); display: block; }
-  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .card h2 { font-size: 16px; font-weight: 600; margin: 0; align-self: center; }
   .card .id { font: 11px var(--mono); color: var(--ink-3); word-break: break-all; margin-bottom: 8px; }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; font-size: 12.5px; }
   .kv dt { color: var(--ink-3); }
@@ -104,16 +104,14 @@
       <figcaption>Share of the noise power per section, same numbers (…_share.png).</figcaption></figure>
   </div>
   <div class="grid" id="cards"></div>
-  <p class="foot">Noise: flux noise at 1&nbsp;Hz in &micro;&Phi;<sub>0</sub>/&radic;Hz from script #26 (2_results/all_3d_runs.csv),
-    n = 5&times;10<sup>17</sup>&nbsp;m<sup>&minus;2</sup>, faces only &rarr; with sidewall spins. L = InductEx loop inductance.
-    Run folder name ends in hole width &times; hole height &times; lead width &times; bridge width (&micro;m). Mesh export: 3_code/34_mesh_viewer_export.py.</p>
+  <p class="foot">Devices without a number (–) are not in the plot: the 2x5x9 run has no current file, so it shows the mesh only. Mesh export: 3_code/34_mesh_viewer_export.py.</p>
 </section>
 
 <section id="viewer" hidden>
   <header>
     <button id="back" type="button">&larr; All devices</button>
     <h1 id="vTitle"></h1>
-    <div class="stats" id="vStats"></div>
+    <div class="stats" id="vStats" hidden></div>
     <div class="controls">
       <div class="group"><span>View</span>
         <button id="vChip" type="button">Whole chip</button>
@@ -171,20 +169,9 @@
 
   // ---------------- list ----------------
   $("cards").innerHTML = devices.map(d => {
-    const t = describe(d);
-    const bad = UNRELIABLE.some(u => d.id.includes(u));
-    const tag = d.noise_faces == null ? `<span class="tag">no J file: mesh only</span>`
-              : bad ? `<span class="tag">fails #26 checks</span>` : "";
     return `<a class="card" href="#${d.id}">
       <img src="${d.thumb}" alt="Top view of device ${d.plot_no ?? ""} ${d.name}" loading="lazy" width="112" height="112">
-      <div><h2>${badge(d)}${d.name}</h2><div class="id">${t.short} · ${d.id}</div>
-        <dl class="kv">
-          <dt>layout</dt><dd>${t.sub}</dd>
-          <dt>P/w</dt><dd>${d.P_over_w == null ? "–" : d.P_over_w.toFixed(1)}</dd>
-          <dt>mesh</dt><dd>${(d.tets / 1e6).toFixed(2)} M tetrahedra</dd>
-          <dt>noise</dt><dd>${fmt(d.noise_faces)} → ${fmt(d.noise_sidewalls)}</dd>
-          <dt>L</dt><dd>${d.L_pH == null ? "–" : d.L_pH.toFixed(2) + " pH"}</dd>
-        </dl>${tag}</div></a>`;
+      <h2>${badge(d)}${d.name}</h2></a>`;
   }).join("");
 
   // ---------------- viewer ----------------
@@ -272,7 +259,7 @@
     cur = d;
     clearMesh();
     const t = describe(d);
-    $("vTitle").innerHTML = `${badge(d)}${d.name} <span style="color:var(--ink-3);font-weight:400">· ${t.short}</span>`;
+    $("vTitle").innerHTML = `${badge(d)}${d.name}`;
     $("vStats").innerHTML = [`${d.tets.toLocaleString("en-US")} tetrahedra`, `${d.nodes.toLocaleString("en-US")} nodes`,
       `${d.surface_tris.toLocaleString("en-US")} surface triangles`, `film ${d.film_nm} nm`,
       d.noise_faces == null ? "no J file" : `noise ${fmt(d.noise_faces)} → ${fmt(d.noise_sidewalls)} µΦ₀/√Hz`]
