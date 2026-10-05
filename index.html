@@ -49,6 +49,13 @@
   .kv dd { margin: 0; font: 12px var(--mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
   .tag { display: inline-block; font: 11px var(--mono); padding: 1px 6px; border-radius: 3px; margin-top: 8px;
     border: 1px solid var(--warn); color: var(--warn); }
+  .num { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; margin-right: 8px;
+    border-radius: 13px; background: var(--ink); color: var(--bg); font: 600 14px var(--mono); vertical-align: 1px; }
+  .num.none { background: var(--panel-2); color: var(--ink-3); border: 1px solid var(--line); }
+  .plots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin: 0 0 22px; }
+  .plots figure { margin: 0; background: #fff; border-radius: 6px; padding: 8px; }
+  .plots img { width: 100%; height: auto; display: block; }
+  .plots figcaption { color: #444; font-size: 12.5px; padding: 6px 4px 0; }
   .foot { margin-top: 24px; color: var(--ink-3); font-size: 12.5px; max-width: 90ch; }
 
   /* ---- viewer ---- */
@@ -88,11 +95,18 @@
   <h1>3D (tetrahedral) TTH meshes of the SQUID layouts</h1>
   <p class="lede">Every 3D InductEx/TTH run in <code>data/tetra_sims/</code>. Pick a device to open its mesh: the outer
     faces of every tetrahedron, i.e. the top, bottom and sidewalls of the 100 nm film, coloured by element size or
-    current density. Thumbnails are top views of &plusmn;15&nbsp;&micro;m around the SQUID.</p>
+    current density. Thumbnails are top views of &plusmn;15&nbsp;&micro;m around the SQUID.
+    <b>The numbers are the device numbers of the P/w noise plot below</b> (script #32): point&nbsp;3 in the plot is card&nbsp;3 here.</p>
+  <div class="plots">
+    <figure><img src="plot_noise.png" alt="Flux noise of each section vs P/w, devices numbered 1 to 8" loading="lazy">
+      <figcaption>Flux noise vs P/w, numbered by device (#32, 2_results/noise_vs_P_over_w_sections_3d_noise.png).</figcaption></figure>
+    <figure><img src="plot_share.png" alt="Share of the noise power of each section vs P/w, devices numbered 1 to 8" loading="lazy">
+      <figcaption>Share of the noise power per section, same numbers (…_share.png).</figcaption></figure>
+  </div>
   <div class="grid" id="cards"></div>
   <p class="foot">Noise: flux noise at 1&nbsp;Hz in &micro;&Phi;<sub>0</sub>/&radic;Hz from script #26 (2_results/all_3d_runs.csv),
     n = 5&times;10<sup>17</sup>&nbsp;m<sup>&minus;2</sup>, faces only &rarr; with sidewall spins. L = InductEx loop inductance.
-    Name = hole width &times; hole height &times; lead width &times; bridge width (&micro;m). Mesh export: 3_code/34_mesh_viewer_export.py.</p>
+    Run folder name ends in hole width &times; hole height &times; lead width &times; bridge width (&micro;m). Mesh export: 3_code/34_mesh_viewer_export.py.</p>
 </section>
 
 <section id="viewer" hidden>
@@ -151,6 +165,8 @@
     return { short: m ? `${(+hw).toString()} × ${(+hh).toString()} µm hole` : d.id,
              sub: m ? `${chip} line, ${tap}; leads ${lw} µm, bridges ${bw} µm` : "" };
   }
+  const badge = d => d.plot_no == null ? `<span class="num none" title="not in the P/w plot">–</span>`
+                                        : `<span class="num" title="device ${d.plot_no} in the P/w plot">${d.plot_no}</span>`;
   const fmt = (v, n = 3) => v == null ? "–" : v.toFixed(n);
 
   // ---------------- list ----------------
@@ -160,10 +176,11 @@
     const tag = d.noise_faces == null ? `<span class="tag">no J file: mesh only</span>`
               : bad ? `<span class="tag">fails #26 checks</span>` : "";
     return `<a class="card" href="#${d.id}">
-      <img src="${d.thumb}" alt="Top view of ${t.short}" loading="lazy" width="112" height="112">
-      <div><h2>${t.short}</h2><div class="id">${d.id}</div>
+      <img src="${d.thumb}" alt="Top view of device ${d.plot_no ?? ""} ${d.name}" loading="lazy" width="112" height="112">
+      <div><h2>${badge(d)}${d.name}</h2><div class="id">${t.short} · ${d.id}</div>
         <dl class="kv">
           <dt>layout</dt><dd>${t.sub}</dd>
+          <dt>P/w</dt><dd>${d.P_over_w == null ? "–" : d.P_over_w.toFixed(1)}</dd>
           <dt>mesh</dt><dd>${(d.tets / 1e6).toFixed(2)} M tetrahedra</dd>
           <dt>noise</dt><dd>${fmt(d.noise_faces)} → ${fmt(d.noise_sidewalls)}</dd>
           <dt>L</dt><dd>${d.L_pH == null ? "–" : d.L_pH.toFixed(2) + " pH"}</dd>
@@ -255,7 +272,7 @@
     cur = d;
     clearMesh();
     const t = describe(d);
-    $("vTitle").textContent = t.short;
+    $("vTitle").innerHTML = `${badge(d)}${d.name} <span style="color:var(--ink-3);font-weight:400">· ${t.short}</span>`;
     $("vStats").innerHTML = [`${d.tets.toLocaleString("en-US")} tetrahedra`, `${d.nodes.toLocaleString("en-US")} nodes`,
       `${d.surface_tris.toLocaleString("en-US")} surface triangles`, `film ${d.film_nm} nm`,
       d.noise_faces == null ? "no J file" : `noise ${fmt(d.noise_faces)} → ${fmt(d.noise_sidewalls)} µΦ₀/√Hz`]
