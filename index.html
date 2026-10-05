@@ -278,7 +278,11 @@
     controls.update();
   }
   function clearMesh() {
-    film.children.slice().forEach(o => { film.remove(o); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); });
+    film.children.slice().forEach(o => {
+      film.remove(o);
+      o.geometry && o.geometry.dispose();
+      [].concat(o.material || []).forEach(m => m.dispose());          // sections mode: one material per section
+    });
     mesh = null;
   }
 
